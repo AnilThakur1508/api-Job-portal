@@ -1,14 +1,14 @@
-# ---------- Build Stage ----------
+# ---------- Build Stage ------------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy only the .csproj and restore
-COPY api-Job-portal/api-Job-portal.csproj ./api-Job-portal/
-RUN dotnet restore ./api-Job-portal/api-Job-portal.csproj
+COPY JobPortal/JobPortal.csproj ./JobPortal/
+RUN dotnet restore ./JobPortal/JobPortal.csproj
 
 # Copy the rest of the code
-COPY api-Job-portal/ ./api-Job-portal/
-WORKDIR /src/api-Job-portal
+COPY JobPortal/ ./JobPortal/
+WORKDIR /src/JobPortal
 
 # Build and publish
 RUN dotnet publish -c Release -o /app/publish --no-restore
@@ -23,4 +23,4 @@ COPY --from=build /app/publish .
 EXPOSE 80
 ENV ASPNETCORE_URLS=http://+:80
 
-ENTRYPOINT ["dotnet", "api-Job-portal.dll"]
+ENTRYPOINT ["dotnet", "JobPortal.dll"]
