@@ -1,28 +1,26 @@
 # ---------- Build Stage ----------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# Copy csproj and restore as distinct layers
-COPY *.csproj ./
-RUN dotnet restore
+# Copy only the .csproj and restore
+COPY api-Job-portal/api-Job-portal.csproj ./api-Job-portal/
+RUN dotnet restore ./api-Job-portal/api-Job-portal.csproj
 
-# Copy the full project and build it
-COPY . ./
+# Copy the rest of the code
+COPY api-Job-portal/ ./api-Job-portal/
+WORKDIR /src/api-Job-portal
+
+# Build and publish
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # ---------- Runtime Stage ----------
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-# Copy the published output from the build stage
+# Copy published output
 COPY --from=build /app/publish .
 
-# ASP.NET Core uses port 8080 by default in .NET 8 minimal hosting, Render expects 80
 EXPOSE 80
-
-# Tell ASP.NET Core to listen on port 80 (instead of default 8080)
 ENV ASPNETCORE_URLS=http://+:80
 
-# Start the application
 ENTRYPOINT ["dotnet", "api-Job-portal.dll"]
-
